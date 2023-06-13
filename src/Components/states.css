@@ -1,0 +1,4 @@
+table {margin-left:50px; text-align:center; border-collapse:collapse;}
+td, th {padding:5px; }
+th {color:white; background-color:blue; font-family:Arial, Helvetica, sans-serif;}
+tr:nth-child(even) {background: #CCC}
