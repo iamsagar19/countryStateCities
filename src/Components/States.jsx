@@ -1,104 +1,174 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
+import { Country, State, City } from "country-state-city";
+import "./states.css";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import { makeStyles } from "@mui/styles";
 
-// import { Country, State, City }  from 'country-state-city';
-
-// // Import Interfaces`
-// import { ICountry, IState, ICity } from 'country-state-city'
-import { Country, State, City } from 'country-state-city'
-import './states.css'
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-var count = 0;
-
-
+const useStyles = makeStyles({
+  table: {
+    minWidth: 650,
+    "& .MuiTableCell-root": {
+      border: "1px solid black",
+    },
+  },
+});
 
 const States = () => {
+  const [allCountries, setAllCountries] = useState([]);
+  const [allStates, setAllStates] = useState([]);
+  const [allCities, setAllCities] = useState([]);
+  const [filteredStates, setFilteredStates] = useState([]);
+  const [filteredCities, setFilteredCities] = useState([]);
+  const [selectedCountryCode, setSelectedCountryCode] = useState("");
+  const [selectedStateCode, setSelectedStateCode] = useState("");
 
-    const [allCountries, setAllCountries] = useState([]);
-    const [allStates, setAllStates] = useState([]);
-    const [allCities,setAllCities] = useState([]);
+  const classes = useStyles();
 
-    
-
-
-
-
-
-useEffect(() => {
-    count++;
-    if (count === 1) {
-        let AllCountries = Country.getAllCountries();
+  useEffect(() => {
+    let AllCountries = Country.getAllCountries();
     let AllStates = State.getAllStates();
     let AllCities = City.getAllCities();
     setAllCountries(AllCountries);
     setAllStates(AllStates);
     setAllCities(AllCities);
-        createTable()
-    }
-    
-    console.log("object")
-},[])
+    setSelectedCountryCode(AllCountries[0].isoCode);
 
-const createTable = () => {
+    createStates(AllStates, AllCountries[0].isoCode, AllCities);
+  }, []);
 
-    //Month Arrays -----------------------------------------------------------
+  const createCities = (allCities, selectedStateCode) => {
+    let FilteredCites = allCities.filter(
+      (item) => item.stateCode === selectedStateCode
+    );
+    setFilteredCities(FilteredCites);
+  };
 
-var monthsEnglish = ["January","February","March","April", "May", "June", "July", "August", "September","October","November","December"];
-var monthsSpanish = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre ","Octubre ","Noviembre","Diciembre"];
-var allCountriesList = Country.getAllCountries();
-var countLength  = allCountriesList.length;
-console.log("countLength",countLength)
-var allStatesList = State.getAllStates();
-var allCitiesList = City.getAllCities();
-var selectedCountryCode = allCountriesList[0].isoCode;
-var FilteredStates = allStatesList.filter(item => item.countryCode === selectedCountryCode);
-// if(FilteredStates.length > countLength) {
-//     countLength = FilteredStates.length;
-// }
-var selectedStateCode = FilteredStates[0].isoCode;
-var FilteredCites = allCitiesList.filter(item => item.stateCode === selectedStateCode)
-// if(FilteredCites.length > countLength) {
-//     countLength = FilteredCites.length;
-// }
-// console.log("allCountriesList",allCountriesList, allStatesList)
-// console.log("allCitiesList",allCitiesList,allStatesList)
-console.log("object",allCountriesList,selectedCountryCode,FilteredStates,FilteredCites,countLength)
+  const createStates = (allStates, selectedCountryCode, AllCities) => {
+    let FilteredStates = allStates.filter(
+      (item) => item.countryCode === selectedCountryCode
+    );
+    setFilteredStates(FilteredStates);
+    setSelectedStateCode(FilteredStates[0].isoCode);
+    createCities(AllCities, FilteredStates[0].isoCode);
+  };
 
+  const changeStates = (country) => {
+    let FilteredStates = allStates.filter(
+      (item) => item.countryCode === country.isoCode
+    );
+    setSelectedCountryCode(country.isoCode);
+    setFilteredStates(FilteredStates);
+    setFilteredCities([]);
+    setSelectedStateCode([])
+  };
 
-//Static content ---------------------------------------------------------
-document.write("<table border='1' width='200'>")
-document.write("<tr><th>Countries</th><th>States</th><th>Cities</th></tr>");
-//Dynamic content --------------------------------------------------------
-// for(var i=0; i<250;i++)
-// {
-    var i = 0;
-    while(i<250) {
-      if(!FilteredStates[i] && !FilteredCites[i]) {
-        document.write("<tr><td>" + allCountriesList[i].name + "</td><td>" + " " + "</td><td>" + " " +"</td></tr>");
-      } else if(!FilteredCites[i]) {
-        document.write("<tr><td>" + allCountriesList[i].name + "</td><td>" + FilteredStates[i].name + "</td><td>" + " " +"</td></tr>");
-      } else if(!FilteredStates[i]) {
-        document.write("<tr><td>" + allCountriesList[i].name + "</td><td>" + " " + "</td><td>" + FilteredCites[i].name +"</td></tr>");
-      } else {
-        document.write("<tr><td>" + allCountriesList[i].name + "</td><td>" + FilteredStates[i].name + "</td><td>" + FilteredCites[i].name +"</td></tr>");
-      }
-
-        i++;
-}
-//Static content  --------------------------------------------------------
-document.write("</table>")
-}
+  const changeCities = (state) => {
+    let  FilteredCites = allCities.filter(
+      (item) => item.stateCode === state.isoCode
+    );
+    setSelectedStateCode(state.isoCode);
+    setFilteredCities(FilteredCites);
+  };
 
   return (
     <div>
-      <h1>Dynamic Table</h1>
+      <TableContainer component={Paper}>
+        <Table
+          className={classes.table}
+          aria-label="simple table"
+        >
+          <TableHead className="tablehead">
+            <TableRow >
+              <TableCell align="center" sx={{ width: "33%" }}>
+                Countries
+              </TableCell>
+              <TableCell align="center" sx={{ width: "33%" }}>
+                States
+              </TableCell>
+              <TableCell align="center" sx={{ width: "33%" }}>
+                Cities
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {allCountries.map((country, i) => {
+              return (
+                <TableRow key={country.name}>
+                  <TableCell
+                    align="center"
+                    component="th"
+                    scope="row"
+                    className={
+                      country.isoCode === selectedCountryCode
+                        ? "selectedCell"
+                        : "tableCell"
+                    }
+                  >
+                    <button
+                      className={
+                        country.isoCode === selectedCountryCode
+                          ? "btn-selected"
+                          : "btn-none"
+                      }
+                      onClick={(e) => {
+                        changeStates(country);
+                      }}
+                    >
+                      {country.name}
+                    </button>
+                  </TableCell>
+                  {filteredStates.length > 0 && filteredStates[i] ? (
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      align="center"
+                      className={
+                        filteredStates[i].isoCode === selectedStateCode
+                          ? "selectedCell"
+                          : "tableCell"
+                      }
+                    >
+                      <button
+                        className={
+                          filteredStates[i].isoCode === selectedStateCode
+                            ? "btn-selected"
+                            : "btn-none"
+                        }
+                        onClick={(e) => {
+                          changeCities(filteredStates[i]);
+                        }}
+                      >
+                        {filteredStates[i] && filteredStates[i].name
+                          ? filteredStates[i].name
+                          : ""}
+                      </button>
+                    </TableCell>
+                  ) : (
+                    <TableCell component="th" scope="row"></TableCell>
+                  )}
+                  {filteredCities.length > 0 && filteredCities[i] ? (
+                    <TableCell component="th" scope="row" align="center">
+                      {filteredCities[i] && filteredCities[i].name
+                        ? filteredCities[i].name
+                        : ""}
+                    </TableCell>
+                  ) : (
+                    <TableCell component="th" scope="row"></TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
-  )
-}
+  );
+};
 
-export default States
+export default States;
